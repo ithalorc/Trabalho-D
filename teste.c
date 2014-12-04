@@ -80,35 +80,38 @@ Candidato c[100], aux, v[100];
 		v[m-1] = c[0];
 		c[0] = c[i-m];
 		m++;
-	}
-
-//		fp = fopen("candidatos.txt","wb");
-//		fwrite(&c[m-1],sizeof(Candidato),m,fp);
-//		c[m-1] = c[i-m];
-//		fclose(fp);
-//		m++;
-	
-//	for(k = 0; k < i-m ; k++){
-//		printf("k = %d, m = %d, Inscrição: %s, Nome: %s, Período: %d, Turno: %s, Posição: %d, Curso: %s\n",k,m,
-//						c[k].inscr,c[k].nome,c[k].periodo,c[k].turno,c[k].posicao,c[k].curso);
-//	}
-
-//	}
-
-	printf("\ncont = %d\n",cont);
-	printf("\nPrint de C\n");
-
-	for(k = 0; k < i ; k++){
-		printf("k = %d, k + 1 = %d, Inscrição: %s, Nome: %s, Período: %d, Turno: %s, Posição: %d, Curso: %s\n",k,k+1,
-						c[k].inscr,c[k].nome,c[k].periodo,c[k].turno,c[k].posicao,c[k].curso);
-	}
-	
-	printf("\nPrint de V\n");
+	}	
+printf("\nPrint de V\n");
 
 	for(k = 0; k < i ; k++){
 		printf("k = %d, k + 1 = %d, Inscrição: %s, Nome: %s, Período: %d, Turno: %s, Posição: %d, Curso: %s\n",k,k+1,
 						v[k].inscr,v[k].nome,v[k].periodo,v[k].turno,v[k].posicao,v[k].curso);
 	}
+		fp = fopen("candidatos.txt","wb");
+		fwrite(v,sizeof(Candidato),57,fp);
+		fclose(fp);
+
+	for(k = 0; k < i-m ; k++){
+		printf("k = %d, m = %d, Inscrição: %s, Nome: %s, Período: %d, Turno: %s, Posição: %d, Curso: %s\n",k,m,
+						c[k].inscr,c[k].nome,c[k].periodo,c[k].turno,c[k].posicao,c[k].curso);
+	}
+
+
+
+//	printf("\ncont = %d\n",cont);
+//	printf("\nPrint de C\n");
+//
+//	for(k = 0; k < i ; k++){
+//		printf("k = %d, k + 1 = %d, Inscrição: %s, Nome: %s, Período: %d, Turno: %s, Posição: %d, Curso: %s\n",k,k+1,
+//						c[k].inscr,c[k].nome,c[k].periodo,c[k].turno,c[k].posicao,c[k].curso);
+//	}
+//	
+//	printf("\nPrint de V\n");
+//
+//	for(k = 0; k < i ; k++){
+//		printf("k = %d, k + 1 = %d, Inscrição: %s, Nome: %s, Período: %d, Turno: %s, Posição: %d, Curso: %s\n",k,k+1,
+//						v[k].inscr,v[k].nome,v[k].periodo,v[k].turno,v[k].posicao,v[k].curso);
+//	}
 
 //	fp = fopen("candidatos.txt","wb");
 
@@ -133,18 +136,18 @@ Candidato c[100], aux, v[100];
 
 	printf("Abrindo arquivo após Ordenação.\n\n");
 
-//	fp = fopen("candidatos.txt","rb");
-//	
-//	if(fp == NULL)
-//		printf("Erro ao abrir arquivo.\n");
-//	else{
-//		for(k = 0; k < i ; k++){
-//			fread(&c[k],sizeof(Candidato),k+1,fp);
-//			printf("k = %d, k + 1 = %d, Inscrição: %s, Nome: %s, Período: %d, Turno: %s, Posição: %d, Curso: %s\n",k,k+1,
-//						c[k].inscr,c[k].nome,c[k].periodo,c[k].turno,c[k].posicao,c[k].curso);
-//		}
-//	}
-//	fclose(fp);	
+	fp = fopen("candidatos.txt","rb");
+	
+	if(fp == NULL)
+		printf("Erro ao abrir arquivo.\n");
+	else{
+		fread(c,sizeof(Candidato),i,fp);
+		for(k = 0; k < i ; k++){
+			printf("k = %d, k + 1 = %d, Inscrição: %s, Nome: %s, Período: %d, Turno: %s, Posição: %d, Curso: %s\n",k,k+1,
+						c[k].inscr,c[k].nome,c[k].periodo,c[k].turno,c[k].posicao,c[k].curso);
+		}
+	}
+	fclose(fp);	
 	// Heapsort
 	/* Ordenando vetor com 6 arquivos em memória - Heapsort */
 	
