@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 
 struct candidato
 {
@@ -15,15 +16,16 @@ struct candidato
 typedef struct candidato Candidato;
 
 void leArquivo();
-int verifTamanho(int i, Candidato *vetor);
-Candidato ordenaArquivo(Candidato *vetor, int fim);
 void criaArquivo(Candidato *vetor, int i);
-
+void zeraVetor(Candidato *vetor, int fim);
+Candidato ordenaArquivo(Candidato *vetor, int fim);
 
 FILE *fp;
 int num = 0, qtdeArq = -1, final = 0;
+float nLeituras = 0, nRegistros = 0;
 char vetArquivos[15], arquivos[15], cand[15] = "candidatos.";
-void leArqOrdenado();
+clock_t inicio,fim;
+double elapsed;
 
 main(){
 
@@ -35,17 +37,28 @@ main(){
 	}while(access(arquivos,F_OK) != -1);
 
 	num = 0;		// Para reler os arquivos a partir de "candidatos.000", onde 000 = n
-
 	/* Fim de verificação - Resultado em qtdeArq */
 
-	while(final != 1)
+	while(final != 1){
+		inicio = clock();
 		leArquivo();	// Função para ler 6 arquivos
+	}
+	fim = clock();
+
+	/* Imprime numero de passos durante a intercalação */
+	printf("Numero de leituras = %.0f\nNumero de registros = %.0f\nNumero de passos = %.0f/%.0f = %.02f\n\n",nLeituras,nRegistros,nRegistros,nLeituras,nRegistros/nLeituras);
+	
+	/* Converte resultado do clock() para tipo double */
+	elapsed = ((double)(fim - inicio)) / CLOCKS_PER_SEC;
+	
+	/* Imprime tempo decorrido durante a intercalação */
+	printf("Tempo de intercalação: %.04f\n\n",elapsed);
 }
 
-void leArquivo(){
-
-	int i = 0, ciclos = 0, verif = 1;
-	Candidato vetor[1000];
+void leArquivo()
+{
+	int i = 0, ciclos = 0, verif = 1, fim = 0;
+	Candidato vetor[2000];
 	
 	while(verif != 0 && ciclos < 6){
 		sprintf(vetArquivos,"%s%03d",cand,num);	
@@ -56,8 +69,9 @@ void leArquivo(){
 			break;
 		}else{
 			printf("Aberto arquivo %s\n\n",vetArquivos);
-			fread(&vetor[i],sizeof(Candidato),i+1,fp);
-			i = verifTamanho(i, vetor);	// i recebe tamanho calculado na função verifTamanho()
+			fim += fread(&vetor[fim],sizeof(Candidato),1000,fp);
+			nRegistros += fim;
+			nLeituras = fim;
 			fclose(fp);
 			num++;	// num incrementado para leitura de proximo arquivo (ex: num de 000 para 001)
 			ciclos++;
@@ -65,32 +79,18 @@ void leArquivo(){
 	}
 
 	/* Envia vetor com registros para serem ordenados na função de ordenação ordenaArquivo() */
-	//*vetor = ordenaArquivo(vetor,i);
-	ordenaArquivo(vetor, i);
+	ordenaArquivo(vetor, fim);
+
 	/* Envia vetor já ordenado para ser gravado em novo arquivo pela função criaArquivo() */
-	//criaArquivo(ordenaArquivo(vetor, i),i);
-
-}
-
-/* Função para descobrir tamanho de cada arquivo para que o próximo seja armazenado no indice seguinte do vetor */
-int verifTamanho(int i, Candidato *vetor){
-		
-	while(vetor[i].periodo != 0){
-		printf("i = %d Inscrição: %s, Nome: %s, Período: %d, Turno: %s, Posição: %d, Curso: %s\n",i, 
-					vetor[i].inscr,vetor[i].nome,vetor[i].periodo,vetor[i].turno,vetor[i].posicao,vetor[i].curso);
-		i++;
-		fread(&vetor[i],sizeof(Candidato),SEEK_CUR,fp);
-		
-	}
-
-	return i;
+	zeraVetor(vetor, fim);
 
 }
 
 /* Função para ordenar vetor, com os registros lidos, com o Heapsort */
-Candidato ordenaArquivo(Candidato *vetor, int fim){
+Candidato ordenaArquivo(Candidato *vetor, int fim)
+{
 	int k, l, ini, verif;
-	Candidato sub[1000], aux;
+	Candidato sub[2000], aux;
 
 	printf("Início de Heapsort.\n\n");
 	//while(ini <= fim){ 	// Fica no loop enquanto todo o vetor não for 'varrido'
@@ -112,54 +112,34 @@ Candidato ordenaArquivo(Candidato *vetor, int fim){
 		}
 		sub[ini-1] = vetor[0];				// Próximo índice vazio recebe raíz de vetor[]
 		vetor[0] = vetor[fim - ini];		// Raíz de vetor[] recebe último índice de vetor[]
-	//	ini++;									// Incrementa ini para atualizar próximo índice vazio de sub[]
-	//	printf("sub[ini-1] = %s e vetor[] = %s\n",sub[ini-1].nome,vetor[0].nome);
 	}
-
 	criaArquivo(sub,fim);
-	
-//	return *sub;
-
+	zeraVetor(sub, fim);
 }
 
 /* Função para criar arquivo com registros, dos últimos arquivos lidos, ordenados */
-void criaArquivo(Candidato *vetor, int i){
-
+void criaArquivo(Candidato *vetor, int i)
+{
 	if(num >= qtdeArq){
 		strcpy(arquivos,"candidatos.txt");
 		final = 1;
 	}else
 		sprintf(arquivos,"%s%03d",cand,qtdeArq++);
-		
-	printf("\nDepois do if|else - arquivos = %s\n\n",arquivos);
 
-	/* Escreve Vetor, já ordenado, no arquivo de saída */ 
+	/* Escreve Vetor, já ordenado, no arquivo de saída */
 	fp = fopen(arquivos,"wb");
 	fwrite(vetor,sizeof(Candidato),i,fp);
 	fclose(fp);
 	/* Fim de leitura */
-	
 }
 
-/* Função (bônus) para ler arquivo já ordenado */
-void leArqOrdenado(int i){
-	int k;
-	Candidato vet[1000];
-	printf("Abrindo arquivo após Ordenação.\n\n");
+/* Função para zerar vetor() */
+void zeraVetor(Candidato *vetor, int fim)
+{
+	int i;
 
-   fp = fopen("candidatos.txt","rb");
-
-   if(fp == NULL)
-      printf("Erro ao abrir arquivo.\n");
-   else{
-      fread(vet,sizeof(Candidato),i,fp);
-      for(k = 0; k < i ; k++){
-         printf("k = %d, Inscrição: %s, Nome: %s, Período: %d, Turno: %s, Posição: %d, Curso: %s\n",k,
-                  vet[k].inscr,vet[k].nome,vet[k].periodo,vet[k].turno,vet[k].posicao,vet[k].curso);
-      }
-   }
-   fclose(fp);
-   /* Fim de leitura */	
-
-
+	for(i = 0; i < fim; i++)
+		vetor[i].periodo = 0;
 }
+/* Fim de função zeraVetor() */
+
